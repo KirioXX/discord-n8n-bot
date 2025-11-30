@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, Events, Partials, Message } from 'discord.js';
 import dotenv from 'dotenv';
 import { Action, ActionType } from './Action';
+import { logger } from './logger';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -15,10 +16,22 @@ const client = new Client({
 });
 
 client.once(Events.ClientReady, (c) => {
-  console.log(`✅ Bot is online! Logged in as ${c.user.tag}`);
+  logger.log({
+    level: 'info',
+    message: `✅ Discord Bot is online`,
+    bot_user_id: c.user.id,
+  });
 });
 
 client.on(Events.MessageCreate, async (message: Message) => {
+  logger.log({
+    level: 'info',
+    message: `Message received`,
+    message_id: message.id,
+    author_id: message.author.id,
+    channel_id: message.channel.id,
+  });
+
   // Ignore messages from bots
   if (message.author.bot) return;
 
@@ -33,14 +46,45 @@ client.on(Events.MessageCreate, async (message: Message) => {
       message.channel.id
     );
   } else {
+    logger.log({
+      level: 'info',
+      message: 'Message ignored',
+      message_id: message.id,
+      author_id: message.author.id,
+      channel_id: message.channel.id,
+    });
     return;
   }
+  logger.log({
+    level: 'info',
+    message: 'Processing action',
+    action_type: action.type,
+    user_id: action.userId,
+    content: action.message,
+    channel_id: action.channelId,
+  });
 
   try {
+    logger.log({
+      level: 'info',
+      message: 'Sending action to webhook',
+      action_type: action.type,
+      user_id: action.userId,
+      content: action.message,
+      channel_id: action.channelId,
+    });
     const reply = await action.sendToWebhook();
+    logger.log({
+      level: 'info',
+      message: 'Reply received from webhook',
+    });
     await message.reply(reply);
   } catch (error) {
-    console.error('❌ Error sending reply:', error);
+    logger.log({
+      level: 'error',
+      message: 'Error sending reply',
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 });
 
@@ -49,10 +93,18 @@ const n8n_webhook_url = process.env.N8N_WEBHOOK_URL;
 const n8n_webhook_key = process.env.N8N_WEBHOOK_KEY;
 
 if (!n8n_webhook_url || !n8n_webhook_key) {
+  logger.log({
+    level: 'error',
+    message: 'N8N webhook URL or key is missing',
+  });
   process.exit(1);
 }
 
 if (!discord_token) {
+  logger.log({
+    level: 'error',
+    message: 'Discord bot token is missing',
+  });
   process.exit(1);
 }
 
