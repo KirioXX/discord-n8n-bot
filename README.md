@@ -1,64 +1,72 @@
-# Discord Bot - Direct Message Responder
+# Discord N8N Bot
 
-Forwards incoming Discord WebSocket messages to HTTP
+Forwards Discord messages to HTTP endpoints and integrates with N8N workflows.
 
 ## Features
 
-- Forwards incoming Discord WebSocket messages to HTTP
-- Built with TypeScript for type safety
-- Uses discord.js v14
+- Discord to HTTP forwarding
+- TypeScript codebase
+- Multi-arch Docker image (amd64/arm64)
+- Volta-managed Node, pnpm, pm2
+- Easy Docker Compose deployment
+
+## Quick Start
+
+**Docker Compose:**
+
+```bash
+docker compose up -d
+```
+
+Edit `docker-compose.yml` to set your environment variables.
+
+**Local Development:**
+
+```bash
+pnpm install
+pnpm run dev
+```
+
+See docs for environment variable setup.
 
 ## Prerequisites
 
-- Node.js (v16 or higher)
-- A Discord Bot Token
+- Discord Bot Token
+- Docker & Docker Compose
+- (Optional) Node.js & pnpm for local dev
 
-## Getting Your Discord Bot Token
+## Documentation
 
-1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
-2. Click "New Application" and give it a name
-3. Go to the "Bot" section in the left sidebar
-4. Click "Add Bot"
-5. Under the "TOKEN" section, click "Copy" to copy your bot token
-6. In the "Privileged Gateway Intents" section, enable:
-   - MESSAGE CONTENT INTENT (if needed for your bot to read message content)
-7. Go to "OAuth2" > "URL Generator"
-8. Select scopes: `bot`
-9. Select bot permissions: `Send Messages`, `Read Messages/View Channels`
-10. Copy the generated URL and open it in your browser to invite the bot to your server
+- [Deployment & N8N Integration](docs/DEPLOYMENT.md)
+- [Discord Bot Token Setup](https://discord.com/developers/applications)
 
-## Installation
+---
 
-1. Install dependencies:
-```bash
-npm install
-```
+For full setup, environment variables, and N8N instructions, see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
-2. Create a `.env` file in the root directory (you can copy from `.env.example`):
-```
-DISCORD_BOT_TOKEN=your_discord_bot_token_here
-```
+## Multi-arch & Volta
 
-Replace `your_discord_bot_token_here` with your actual Discord bot token.
+- The Docker image is built for both amd64 and arm64 (Raspberry Pi supported)
+- Uses Volta for Node, pnpm, and pm2 version management
 
-## Usage
+## Updating
 
-### Build and Run
+To update, pull the latest image and restart:
 
 ```bash
-# Build the TypeScript code
-npm run build
-
-# Start the bot
-npm start
+docker compose pull
+docker compose up -d
 ```
 
-### Development Mode
+## Troubleshooting
 
-```bash
-# Build and run in one command
-npm run dev
-```
+- Check container logs: `docker compose logs discord-bot`
+- Ensure environment variables are set correctly
+- Verify Discord bot token and N8N webhook URL
+
+---
+
+For deployment and N8N setup, see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## How It Works
 
@@ -67,15 +75,17 @@ The bot listens for direct messages and automatically replies with "Hallo World"
 ## Project Structure
 
 ```
+
 .
 ├── src/
-│   └── bot.ts          # Main bot code
-├── dist/               # Compiled JavaScript (generated)
-├── .env                # Environment variables (create this)
-├── .gitignore          # Git ignore rules
-├── package.json        # Dependencies and scripts
-├── tsconfig.json       # TypeScript configuration
-└── README.md           # This file
+│ └── bot.ts # Main bot code
+├── dist/ # Compiled JavaScript (generated)
+├── .env # Environment variables (create this)
+├── .gitignore # Git ignore rules
+├── package.json # Dependencies and scripts
+├── tsconfig.json # TypeScript configuration
+└── README.md # This file
+
 ```
 
 ## Troubleshooting
@@ -83,8 +93,3 @@ The bot listens for direct messages and automatically replies with "Hallo World"
 - **Bot doesn't respond to DMs**: Make sure the bot has the necessary intents enabled in the Discord Developer Portal
 - **"DISCORD_BOT_TOKEN is not defined" error**: Check that your `.env` file exists and contains a valid token
 - **Bot can't read messages**: Ensure you've enabled the MESSAGE CONTENT INTENT in the Discord Developer Portal
-
-## License
-
-ISC
-
