@@ -1,6 +1,6 @@
-FROM node:24-alpine AS builder
+FROM node:20-bookworm AS builder
 WORKDIR /app
-RUN apk add --no-cache curl jq bash
+RUN apt-get update && apt-get install -y curl jq bash
 RUN curl https://get.volta.sh | bash
 ENV VOLTA_HOME="/root/.volta"
 ENV PATH="$VOLTA_HOME/bin:$PATH"
@@ -10,10 +10,10 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
-FROM node:24-alpine
+FROM node:20-bookworm
 WORKDIR /app
 # Install Volta
-RUN apk add --no-cache curl jq bash
+RUN apt-get update && apt-get install -y curl jq bash
 RUN curl https://get.volta.sh | bash
 ENV VOLTA_HOME="/root/.volta"
 ENV PATH="$VOLTA_HOME/bin:$PATH"
