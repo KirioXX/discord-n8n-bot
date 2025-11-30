@@ -10,3 +10,9 @@ services:
     # Uncomment if you want to use a .env file
     # env_file:
     #   - .env
+    healthcheck:
+      test: ['CMD', 'pm2', 'status', '|', 'grep', 'online']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

@@ -14,4 +14,6 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 RUN volta install node && volta install pm2
 ENV NODE_ENV=production
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+	CMD pm2 status | grep online || exit 1
 CMD ["pm2-runtime", "dist/bot.js"]
