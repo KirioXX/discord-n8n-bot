@@ -29,13 +29,15 @@ jobs:
 
       - name: Build and push Docker image (x86_64)
         run: |
-          nixpacks build . -t ghcr.io/${{ github.repository }}:${{ github.ref_name }}-amd64 --platform linux/amd64
-          docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}-amd64
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          nixpacks build . -t ghcr.io/$REPO_LOWER:${{ github.ref_name }}-amd64 --platform linux/amd64
+          docker push ghcr.io/$REPO_LOWER:${{ github.ref_name }}-amd64
 
       - name: Build and push Docker image (arm64)
         run: |
-          nixpacks build . -t ghcr.io/${{ github.repository }}:${{ github.ref_name }}-arm64 --platform linux/arm64
-          docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}-arm64
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          nixpacks build . -t ghcr.io/$REPO_LOWER:${{ github.ref_name }}-arm64 --platform linux/arm64
+          docker push ghcr.io/$REPO_LOWER:${{ github.ref_name }}-arm64
 
       - name: Logout from GitHub Container Registry
         run: docker logout ghcr.io
