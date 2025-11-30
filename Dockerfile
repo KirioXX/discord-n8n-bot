@@ -1,8 +1,7 @@
 FROM domjtalbot/volta:latest AS builder
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN volta setup
-RUN volta install pnpm
+RUN volta setup && volta install pnpm
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
