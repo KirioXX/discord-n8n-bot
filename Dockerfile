@@ -1,7 +1,6 @@
 FROM node:24-alpine AS builder
 WORKDIR /app
-# Install Volta
-RUN apk add --no-cache curl jq
+RUN apk add --no-cache curl jq bash
 RUN curl https://get.volta.sh | bash
 ENV VOLTA_HOME="/root/.volta"
 ENV PATH="$VOLTA_HOME/bin:$PATH"
@@ -14,7 +13,7 @@ RUN pnpm run build
 FROM node:24-alpine
 WORKDIR /app
 # Install Volta
-RUN apk add --no-cache curl jq
+RUN apk add --no-cache curl jq bash
 RUN curl https://get.volta.sh | bash
 ENV VOLTA_HOME="/root/.volta"
 ENV PATH="$VOLTA_HOME/bin:$PATH"
