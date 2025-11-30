@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Events, Partials, Message } from 'discord.js';
 import dotenv from 'dotenv';
+import { Action, ActionType } from './Action';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -10,7 +11,7 @@ const client = new Client({
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.GuildMessages,
   ],
-  partials: [Partials.Channel]
+  partials: [Partials.Channel],
 });
 
 client.once(Events.ClientReady, (c) => {
@@ -18,71 +19,41 @@ client.once(Events.ClientReady, (c) => {
 });
 
 client.on(Events.MessageCreate, async (message: Message) => {
-  if (message.author.bot) return; 
+  // Ignore messages from bots
+  if (message.author.bot) return;
 
+  let action: Action;
   if (message.channel.isDMBased()) {
-    console.log(`📩 Received DM from ${message.author.tag}: ${message.content}`);
-    
-    try {
-      const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
-      if (N8N_WEBHOOK_URL) {
-        const body = {
-          type: 'direct_message',
-          userId: message.author.id,
-          message: message.content
-        };
-
-        await fetch(N8N_WEBHOOK_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
-      } else {
-        console.warn('ON_DIRECT_MESSAGE_RECEIVED_URL is not defined in environment.');
-      }
-
-      console.log(`✉️ Replied to ${message.author.tag}`);
-    } catch (error) {
-      console.error('❌ Error sending reply:', error);
-    }
+    action = new Action(ActionType.DM_RECEIVED, message.author.id, message.content);
   } else if (message.mentions.has(client.user!.id)) {
-    console.log(`💬 Mentioned in channel by ${message.author.tag}: ${message.content}`);
+    action = new Action(
+      ActionType.CHANNEL_MENTION,
+      message.author.id,
+      message.content,
+      message.channel.id
+    );
+  } else {
+    return;
+  }
 
-    const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
-    if (N8N_WEBHOOK_URL) {
-      const body = {
-        type: 'channel_mention',
-        userId: message.author.id,
-        message: message.content,
-        channelId: message.channel.id,
-      };
-
-      await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-    } else {
-      console.warn('ON_DIRECT_MESSAGE_RECEIVED_URL is not defined in environment.');
-    }
-    
-    try {
-      console.log(`✉️ Replied to ${message.author.tag} in channel`);
-    } catch (error) {
-      console.error('❌ Error sending reply:', error);
-    }
+  try {
+    const reply = await action.sendToWebhook();
+    await message.reply(reply);
+  } catch (error) {
+    console.error('❌ Error sending reply:', error);
   }
 });
 
-const token = process.env.DISCORD_BOT_TOKEN;
+const discord_token = process.env.DISCORD_BOT_TOKEN;
+const n8n_webhook_url = process.env.N8N_WEBHOOK_URL;
+const n8n_webhook_key = process.env.N8N_WEBHOOK_KEY;
 
-if (!token) {
-  console.error('❌ Error: DISCORD_BOT_TOKEN is not defined in .env file');
+if (!n8n_webhook_url || !n8n_webhook_key) {
   process.exit(1);
 }
 
-client.login(token);
+if (!discord_token) {
+  process.exit(1);
+}
+
+client.login(discord_token);
