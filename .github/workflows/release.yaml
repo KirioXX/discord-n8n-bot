@@ -34,7 +34,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          tags: ghcr.io/${{ github.repository.toLowerCase() }}:${{ github.ref_name }}
 
       - name: Logout from GitHub Container Registry
         run: docker logout ghcr.io
